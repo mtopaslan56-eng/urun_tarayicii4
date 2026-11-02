@@ -19,7 +19,8 @@ class _TaramaEkraniState extends State<TaramaEkrani> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Barkodu Okut'),
-        backgroundColor: Colors.teal,
+        backgroundColor: Colors.teal.shade700,
+        foregroundColor: Colors.white,
       ),
       body: MobileScanner(
         controller: controller,
