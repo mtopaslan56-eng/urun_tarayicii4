@@ -9,7 +9,7 @@ import 'tarama_ekrani.dart';
 const String BARKODOKU_USER_KEY = 'cTg8XiX4QPvYT37_n8In2KwHiBmhsjui';
 const String BARKODOKU_API_KEY = 'UvCDBwMAHAkSMN4i1BNa8CwXXwq8OVqG-WRREBpIl08-sz7Nbcsri0ZqWOSQ21u7o';
 
-// --- ZARARLI MADDE SÖZLÜĞÜ (Çok Daha Kapsamlı) ---
+// --- ZARARLI MADDE SÖZLÜĞÜ ---
 final Map<String, String> maddeBilgileri = {
   'şeker': 'Kan şekerini hızla yükseltir, diyabet ve obezite riskini artırır.',
   'sugar': 'Kan şekerini hızla yükseltir, diyabet ve obezite riskini artırır.',
@@ -229,7 +229,6 @@ class _HomeTabState extends State<HomeTab> {
     setState(() { yukleniyor = true; urunAdi = null; barkod = b; });
     
     try {
-      // Her iki API'yi de aynı anda sorgula
       var trSonuc = await _barkodokuSorgula(b);
       var offSonuc = await _openFoodFactsSorgula(b);
       
@@ -240,14 +239,12 @@ class _HomeTabState extends State<HomeTab> {
       String? nutriscore;
       int? nova;
 
-      // İsim belirleme (Önce Barkodoku, yoksa OFF)
       if (trSonuc != null && trSonuc['urunAdi'].toString().isNotEmpty) {
         finalName = trSonuc['urunAdi'];
       } else if (offSonuc != null) {
         finalName = offSonuc['urunAdi'];
       }
 
-      // İçerik belirleme (Barkodoku'da içerik varsa onu al, yoksa OFF'den al)
       if (trSonuc != null && trSonuc['icerik'] != null && trSonuc['icerik'].toString().isNotEmpty && trSonuc['icerik'] != 'İçerik yok') {
         finalIngredients = trSonuc['icerik'];
       } else if (offSonuc != null && offSonuc['icerik'] != null) {
@@ -257,7 +254,6 @@ class _HomeTabState extends State<HomeTab> {
         nova = offSonuc['nova'];
       }
 
-      // Resim belirleme (Barkodoku'da resim yoksa OFF'den al)
       if (trSonuc != null && trSonuc['resimUrl'] != null && trSonuc['resimUrl'].toString().isNotEmpty) {
         finalImage = trSonuc['resimUrl'];
       } else if (offSonuc != null && offSonuc['resimUrl'] != null) {
@@ -292,8 +288,11 @@ class _HomeTabState extends State<HomeTab> {
       final data = jsonDecode(barcodeRes.body);
       
       Map<String, dynamic>? urun;
-      if (data is List && data.isNotEmpty) urun = data[0];
-      else if (data is Map && data.containsKey('text')) urun = data;
+      if (data is List && data.isNotEmpty) {
+        urun = Map<String, dynamic>.from(data[0]);
+      } else if (data is Map && data.containsKey('text')) {
+        urun = Map<String, dynamic>.from(data);
+      }
 
       if (urun != null) {
         return {
@@ -350,7 +349,6 @@ class _HomeTabState extends State<HomeTab> {
 
   List<Map<String, dynamic>> icindekileriAnalizEt(String metin) {
     if (metin.isEmpty || metin == 'İçerik yok') return [];
-    // Hem virgül hem noktalı virgülle ayır
     List<String> parcalar = metin.split(RegExp(r'[,;]')).map((e) => e.trim()).toList();
     List<Map<String, dynamic>> analiz = [];
     
@@ -441,7 +439,7 @@ class _HomeTabState extends State<HomeTab> {
                     borderRadius: BorderRadius.circular(24),
                     child: hasImage
                         ? Image.network(urunResmiUrl!, fit: BoxFit.contain, errorBuilder: (c, e, s) => const Icon(Icons.shopping_bag, size: 80, color: Colors.grey))
-                        : const Icon(Icons.shopping_bag, size: 80, color: Colors.grey), // Eğer resim yoksa varsayılan ikon
+                        : const Icon(Icons.shopping_bag, size: 80, color: Colors.grey), 
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -522,7 +520,6 @@ class _HomeTabState extends State<HomeTab> {
   }
 }
 
-// --- ÇARK SEKME KISMI (Aynı kalacak) ---
 class HealthyWheelTab extends StatefulWidget {
   const HealthyWheelTab({super.key});
   @override
