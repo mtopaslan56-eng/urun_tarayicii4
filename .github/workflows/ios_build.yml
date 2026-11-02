@@ -18,6 +18,9 @@ jobs:
       with:
         channel: 'stable'
 
+    - name: Eksik iOS Dosyalarını Oluştur
+      run: flutter create . --platforms=ios
+
     - name: Bağımlılıkları Yükle
       run: flutter pub get
 
