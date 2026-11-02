@@ -20,8 +20,13 @@ workflows:
           rm -f Podfile.lock
           pod install --repo-update
           cd ..
-      - name: iOS Uygulamasını Derle (İmzasız)
+      - name: iOS Uygulamasını Derle (xcodebuild ile İmzasız)
         script: |
-          flutter build ios --release --no-codesign
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace -scheme Runner -configuration Release -sdk iphoneos -derivedDataPath build/ios CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY="" EXPANDED_CODE_SIGN_IDENTITY="" build
+      - name: Derlenen Dosyayı Sıkıştır
+        script: |
+          cd ios/build/Build/Products/Release-iphoneos
+          zip -r Runner.app.zip Runner.app
     artifacts:
-      - build/ios/iphoneos/*.app
+      - ios/build/Build/Products/Release-iphoneos/Runner.app.zip
