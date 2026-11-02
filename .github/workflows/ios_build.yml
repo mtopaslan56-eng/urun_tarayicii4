@@ -26,10 +26,12 @@ jobs:
 
       - name: Podfile Olustur ve Imzalamayi Kapat
         run: |
-          # --no-codesign ekleyerek ayarların imza aramadan hazırlanmasını sağla
+          # Xcode projesini ve Podfile'ı oluştur
           flutter build ios --config-only --no-codesign
-          
+
           cd ios
+          
+          # Podfile'a imzalamayı kapatan ayarı ekle
           if [ -f Podfile ]; then
             echo "" >> Podfile
             echo "post_install do |installer|" >> Podfile
@@ -43,9 +45,11 @@ jobs:
             echo "end" >> Podfile
           fi
 
-          # Xcode projesinde de imzalamayı zorla kapat
-          plutil -replace 'CODE_SIGNING_ALLOWED' -string 'NO' Runner.xcodeproj/project.pbxproj
-          plutil -replace 'CODE_SIGNING_REQUIRED' -string 'NO' Runner.xcodeproj/project.pbxproj
+          # Xcode proje dosyasında imzalamayı 'sed' ile zorla kapat (plutil yerine)
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/DEVELOPMENT_TEAM = .*;/DEVELOPMENT_TEAM = "";/g' Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "";/g' Runner.xcodeproj/project.pbxproj
 
       - name: iOS Uygulamasini Derle (Imzasiz)
         run: flutter build ios --release --no-codesign
