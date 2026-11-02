@@ -21,20 +21,17 @@ jobs:
           flutter create . --platforms=ios --org=com.ornek --project-name=urun_tarayici
           /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Ürün barkodlarını taramak için kameraya erişim gerekiyor.'" ios/Runner/Info.plist || true
           
-          # Podfile'a imzalamayı devre dışı bırakan ayarı ekle
           if [ -f ios/Podfile ]; then
-            cat >> ios/Podfile <<'EOF'
-
-post_install do |installer|
-  installer.pods_project.targets.each do |target|
-    flutter_additional_ios_build_settings(target)
-    target.build_configurations.each do |config|
-      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
-      config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
-    end
-  end
-end
-EOF
+            echo "" >> ios/Podfile
+            echo "post_install do |installer|" >> ios/Podfile
+            echo "  installer.pods_project.targets.each do |target|" >> ios/Podfile
+            echo "    flutter_additional_ios_build_settings(target)" >> ios/Podfile
+            echo "    target.build_configurations.each do |config|" >> ios/Podfile
+            echo "      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'" >> ios/Podfile
+            echo "      config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'" >> ios/Podfile
+            echo "    end" >> ios/Podfile
+            echo "  end" >> ios/Podfile
+            echo "end" >> ios/Podfile
           fi
 
       - name: Bagimliliklari Yukle
