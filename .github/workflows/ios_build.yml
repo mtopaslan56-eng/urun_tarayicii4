@@ -1,0 +1,55 @@
+name: iOS Build
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+      - name: Kodu Indir
+        uses: actions/checkout@v4
+
+      - name: Flutter Kur
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
+
+      - name: iOS Klasorunu Olustur, Kamera Izni ve Podfile Ayari
+        run: |
+          flutter create . --platforms=ios --org=com.ornek --project-name=urun_tarayici
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Ürün barkodlarını taramak için kameraya erişim gerekiyor.'" ios/Runner/Info.plist || true
+          
+          # Podfile'a imzalamayı devre dışı bırakan ayarı ekle
+          if [ -f ios/Podfile ]; then
+            cat >> ios/Podfile <<'EOF'
+
+post_install do |installer|
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+    target.build_configurations.each do |config|
+      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'
+      config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'
+    end
+  end
+end
+EOF
+          fi
+
+      - name: Bagimliliklari Yukle
+        run: flutter pub get
+
+      - name: iOS Uygulamasini Derle (Imzasiz)
+        run: flutter build ios --release --no-codesign
+
+      - name: Derlenen Dosyayi Sikistir
+        run: |
+          cd build/ios/iphoneos
+          zip -r Runner.app.zip Runner.app
+
+      - name: Dosyayi GitHub'a Yukle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Runner-app-ios
+          path: build/ios/iphoneos/Runner.app.zip
