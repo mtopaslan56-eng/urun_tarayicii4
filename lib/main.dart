@@ -84,7 +84,7 @@ class _UrunTarayiciAppState extends State<UrunTarayiciApp> {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00897B)),
         useMaterial3: true,
-        scaffoldBackgroundColor: isDarkMode ? null : const Color(0xFFF5F7FA),
+        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00897B), brightness: Brightness.dark),
@@ -239,21 +239,27 @@ class _HomeTabState extends State<HomeTab> {
       String? nutriscore;
       int? nova;
 
+      // İsim seçimi
       if (trSonuc != null && trSonuc['urunAdi'].toString().isNotEmpty) {
         finalName = trSonuc['urunAdi'];
       } else if (offSonuc != null) {
         finalName = offSonuc['urunAdi'];
       }
 
-      if (trSonuc != null && trSonuc['icerik'] != null && trSonuc['icerik'].toString().isNotEmpty && trSonuc['icerik'] != 'İçerik yok') {
-        finalIngredients = trSonuc['icerik'];
-      } else if (offSonuc != null && offSonuc['icerik'] != null) {
-        finalIngredients = offSonuc['icerik'];
+      // İçerik seçimi (En uzun/detaylı içeriği seç)
+      String trIcerik = trSonuc?['icerik'] ?? '';
+      String offIcerik = offSonuc?['icerik'] ?? '';
+      
+      if (trIcerik.isNotEmpty && trIcerik != 'İçerik yok' && trIcerik.length >= offIcerik.length) {
+        finalIngredients = trIcerik;
+      } else if (offIcerik.isNotEmpty) {
+        finalIngredients = offIcerik;
         isOff = true;
-        nutriscore = offSonuc['nutriscore'];
-        nova = offSonuc['nova'];
+        nutriscore = offSonuc?['nutriscore'];
+        nova = offSonuc?['nova'];
       }
 
+      // Resim seçimi
       if (trSonuc != null && trSonuc['resimUrl'] != null && trSonuc['resimUrl'].toString().isNotEmpty) {
         finalImage = trSonuc['resimUrl'];
       } else if (offSonuc != null && offSonuc['resimUrl'] != null) {
@@ -327,30 +333,32 @@ class _HomeTabState extends State<HomeTab> {
   void _sonucuIsle(String? ad, String? icerik, String? resim, {required bool isOff, String? nutriscore, int? nova}) {
     String durum = ''; Color renk = Colors.grey;
     
-    // 1. ÖNCELİK: Open Food Facts'in bilimsel skorları (Nutri-Score / NOVA)
-    if (isOff && nutriscore != null) {
+    final analiz = icindekileriAnalizEt(icerik ?? '');
+    int toplamMadde = analiz.length;
+    int riskliMadde = analiz.where((e) => e['riskli'] == true).length;
+
+    // Eğer içerik listesi varsa, KESİNLİKLE içeriğe göre karar ver.
+    if (toplamMadde > 0) {
+      double riskOrani = riskliMadde / toplamMadde;
+      
+      if (riskliMadde == 0) {
+        durum = '✅ SAĞLIKLI'; renk = Colors.green;
+      } else if (toplamMadde <= 5 && riskliMadde <= 1) {
+        // Az maddeli (ekmek gibi) ve tek riskli (tuz) ise sağlıklı kabul et ama uyar
+        durum = '✅ TÜKETİLEBİLİR'; renk = Colors.green;
+      } else if (riskliMadde >= 3 || riskOrani > 0.4) {
+        durum = '⛔ ZARARLI'; renk = Colors.red;
+      } else {
+        durum = '⚠️ DİKKATLİ TÜKET'; renk = Colors.orange;
+      }
+    } 
+    // İçerik hiç yoksa, Open Food Facts'in Nutri-Score'una güven
+    else if (isOff && nutriscore != null) {
       if (nutriscore == 'd' || nutriscore == 'e' || nova == 4) { durum = '⛔ ZARARLI'; renk = Colors.red; }
       else if (nutriscore == 'c' || nova == 3) { durum = '⚠️ DİKKATLİ TÜKET'; renk = Colors.orange; }
       else { durum = '✅ SAĞLIKLI'; renk = Colors.green; }
-    } 
-    // 2. ÖNCELİK: Kendi Akıllı İçerik Analizimiz (Oran Sistemi)
-    else {
-      final analiz = icindekileriAnalizEt(icerik ?? '');
-      int toplamMadde = analiz.length;
-      int riskliMadde = analiz.where((e) => e['riskli'] == true).length;
-      
-      if (toplamMadde == 0) {
-        durum = 'ℹ️ VERİ YETERSİZ'; renk = Colors.grey;
-      } else {
-        double riskOrani = riskliMadde / toplamMadde;
-        if (riskliMadde == 0) {
-          durum = '✅ TAMAMEN SAĞLIKLI'; renk = Colors.green;
-        } else if (riskOrani > 0.4 || riskliMadde >= 3) {
-          durum = '⛔ ZARARLI'; renk = Colors.red;
-        } else {
-          durum = '⚠️ DİKKATLİ TÜKET'; renk = Colors.orange;
-        }
-      }
+    } else {
+      durum = 'ℹ️ VERİ YETERSİZ'; renk = Colors.grey;
     }
 
     setState(() {
@@ -414,14 +422,15 @@ class _HomeTabState extends State<HomeTab> {
   }
 
   Widget _buildBaslangic() {
+    final theme = Theme.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const AppLogo(size: 130), const SizedBox(height: 30),
-          const Text('Ürünlerin içeriğini\nanında analiz edin', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          Text('Ürünlerin içeriğini\nanında analiz edin', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color)),
           const SizedBox(height: 10),
-          const Text('Katkı maddelerini ve riskleri öğrenin', style: TextStyle(color: Colors.grey, fontSize: 16)),
+          Text('Katkı maddelerini ve riskleri öğrenin', style: TextStyle(color: theme.textTheme.bodySmall?.color, fontSize: 16)),
           const SizedBox(height: 40),
           ElevatedButton.icon(
             onPressed: _tara, icon: const Icon(Icons.qr_code_scanner, size: 28), label: const Text('Taramayı Başlat', style: TextStyle(fontSize: 20)),
@@ -441,7 +450,7 @@ class _HomeTabState extends State<HomeTab> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          // ÜST KISIM (RESİM VE DURUM)
+          // ÜST KISIM
           Container(
             width: double.infinity, padding: const EdgeInsets.fromLTRB(24, 10, 24, 30),
             decoration: BoxDecoration(
@@ -483,7 +492,7 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ),
 
-          // İÇERİK ANALİZİ KISMI
+          // İÇERİK ANALİZİ
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -493,14 +502,14 @@ class _HomeTabState extends State<HomeTab> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1), 
+                      color: Colors.red.withOpacity(0.15), // Karanlık modda da belli olması için opaklık artırıldı
                       borderRadius: BorderRadius.circular(12), 
                       border: Border.all(color: Colors.red.withOpacity(0.3))
                     ),
                     child: Row(children: [
                       const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 30), 
                       const SizedBox(width: 12), 
-                      Expanded(child: Text('Dikkat! İçeriğinde $riskli adet riskli madde bulundu. Detaylar aşağıda.', style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.bold)))
+                      Expanded(child: Text('Dikkat! İçeriğinde $riskli adet riskli madde bulundu. Detaylar aşağıda.', style: TextStyle(color: theme.textTheme.bodyLarge?.color, fontWeight: FontWeight.bold)))
                     ]),
                   ),
                 const SizedBox(height: 20),
@@ -514,7 +523,7 @@ class _HomeTabState extends State<HomeTab> {
                 ...analiz.map((e) => Card(
                   elevation: 0, 
                   margin: const EdgeInsets.only(bottom: 10),
-                  color: e['riskli'] ? Colors.red.withOpacity(0.05) : theme.cardColor,
+                  color: e['riskli'] ? Colors.red.withOpacity(0.1) : theme.cardColor, // Kart rengi temaya uygun
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: e['riskli'] ? Colors.red.withOpacity(0.3) : theme.dividerColor)),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -525,6 +534,7 @@ class _HomeTabState extends State<HomeTab> {
                           children: [
                             Icon(e['riskli'] ? Icons.dangerous : Icons.check_circle, color: e['riskli'] ? Colors.red : Colors.green),
                             const SizedBox(width: 10),
+                            // Yazı rengi temaya uygun
                             Expanded(child: Text(e['madde'], style: TextStyle(fontSize: 16, fontWeight: e['riskli'] ? FontWeight.bold : FontWeight.w500, color: theme.textTheme.bodyLarge?.color))),
                           ],
                         ),
@@ -533,7 +543,7 @@ class _HomeTabState extends State<HomeTab> {
                             padding: const EdgeInsets.only(top: 8.0, left: 34),
                             child: Text(
                               e['aciklama'],
-                              style: TextStyle(color: Colors.red.shade700, fontSize: 14, fontStyle: FontStyle.italic),
+                              style: TextStyle(color: theme.textTheme.bodyMedium?.color, fontSize: 14, fontStyle: FontStyle.italic),
                             ),
                           ),
                       ],
@@ -620,7 +630,7 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
             const SizedBox(height: 16),
             Text(item.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            Text(item.benefit, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15, color: Colors.black87)),
+            Text(item.benefit, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15)),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
@@ -635,15 +645,16 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Market Önerisi'), backgroundColor: Colors.teal.shade700, foregroundColor: Colors.white),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Bugün hangi sağlıklı\nürünü tüketelim?', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            Text('Bugün hangi sağlıklı\nürünü tüketelim?', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color)),
             const SizedBox(height: 10),
-            const Text('Çarkı çevir ve şansını dene!', style: TextStyle(color: Colors.grey, fontSize: 16)),
+            Text('Çarkı çevir ve şansını dene!', style: TextStyle(color: theme.textTheme.bodySmall?.color, fontSize: 16)),
             const SizedBox(height: 30),
             SizedBox(
               width: 300, height: 300,
@@ -805,7 +816,7 @@ class SettingsTab extends StatelessWidget {
             onChanged: onThemeChanged,
           ),
           const Divider(),
-          const ListTile(leading: Icon(Icons.info), title: Text('Uygulama Hakkında'), subtitle: Text('Sağlık Tarayıcı v2.1\nİçerik analizi ve market önerileri.')),
+          const ListTile(leading: Icon(Icons.info), title: Text('Uygulama Hakkında'), subtitle: Text('Sağlık Tarayıcı v2.2\nİçerik analizi ve market önerileri.')),
         ],
       ),
     );
