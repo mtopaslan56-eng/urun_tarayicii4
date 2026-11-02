@@ -423,7 +423,7 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
     if (isSpinning) return;
     setState(() { isSpinning = true; selectedItem = null; });
 
-    double randomTurns = 5 + Random().nextInt(4);
+    int randomTurns = 5 + Random().nextInt(4);
     double randomAngle = Random().nextDouble() * 2 * pi;
     double targetAngle = (randomTurns * 2 * pi) + randomAngle;
 
