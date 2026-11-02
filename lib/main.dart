@@ -327,15 +327,32 @@ class _HomeTabState extends State<HomeTab> {
   void _sonucuIsle(String? ad, String? icerik, String? resim, {required bool isOff, String? nutriscore, int? nova}) {
     String durum = ''; Color renk = Colors.grey;
     
+    // 1. ÖNCELİK: Open Food Facts'in bilimsel skorları (Nutri-Score / NOVA)
     if (isOff && nutriscore != null) {
       if (nutriscore == 'd' || nutriscore == 'e' || nova == 4) { durum = '⛔ ZARARLI'; renk = Colors.red; }
       else if (nutriscore == 'c' || nova == 3) { durum = '⚠️ DİKKATLİ TÜKET'; renk = Colors.orange; }
       else { durum = '✅ SAĞLIKLI'; renk = Colors.green; }
-    } else {
-      final analiz = icindekileriAnalizEt(icindekilerMetni ?? '');
-      final risk = analiz.where((e) => e['riskli'] == true).length;
-      if (risk > 0) { durum = '⚠️ $risk RİSKLİ MADDE'; renk = Colors.orange; } else { durum = '✅ TÜKETİLEBİLİR'; renk = Colors.green; }
+    } 
+    // 2. ÖNCELİK: Kendi Akıllı İçerik Analizimiz (Oran Sistemi)
+    else {
+      final analiz = icindekileriAnalizEt(icerik ?? '');
+      int toplamMadde = analiz.length;
+      int riskliMadde = analiz.where((e) => e['riskli'] == true).length;
+      
+      if (toplamMadde == 0) {
+        durum = 'ℹ️ VERİ YETERSİZ'; renk = Colors.grey;
+      } else {
+        double riskOrani = riskliMadde / toplamMadde;
+        if (riskliMadde == 0) {
+          durum = '✅ TAMAMEN SAĞLIKLI'; renk = Colors.green;
+        } else if (riskOrani > 0.4 || riskliMadde >= 3) {
+          durum = '⛔ ZARARLI'; renk = Colors.red;
+        } else {
+          durum = '⚠️ DİKKATLİ TÜKET'; renk = Colors.orange;
+        }
+      }
     }
+
     setState(() {
       urunAdi = ad; 
       icindekilerMetni = icerik; 
@@ -419,43 +436,54 @@ class _HomeTabState extends State<HomeTab> {
     List<Map<String, dynamic>> analiz = icindekileriAnalizEt(icindekilerMetni ?? '');
     int riskli = analiz.where((e) => e['riskli'] == true).length;
     bool hasImage = urunResmiUrl != null && urunResmiUrl!.isNotEmpty;
+    final theme = Theme.of(context);
 
     return SingleChildScrollView(
       child: Column(
         children: [
+          // ÜST KISIM (RESİM VE DURUM)
           Container(
             width: double.infinity, padding: const EdgeInsets.fromLTRB(24, 10, 24, 30),
             decoration: BoxDecoration(
-              color: durumRengi.withOpacity(0.05), 
+              color: durumRengi.withOpacity(0.08), 
               borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(40), bottomRight: Radius.circular(40)),
-              border: Border(bottom: BorderSide(color: durumRengi.withOpacity(0.2), width: 2)),
+              border: Border(bottom: BorderSide(color: durumRengi.withOpacity(0.3), width: 2)),
             ),
             child: Column(
               children: [
                 Container(
                   height: 160, width: 160,
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 8))]),
+                  decoration: BoxDecoration(
+                    color: theme.cardColor, 
+                    borderRadius: BorderRadius.circular(24), 
+                    boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 8))]
+                  ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: hasImage
-                        ? Image.network(urunResmiUrl!, fit: BoxFit.contain, errorBuilder: (c, e, s) => const Icon(Icons.shopping_bag, size: 80, color: Colors.grey))
-                        : const Icon(Icons.shopping_bag, size: 80, color: Colors.grey), 
+                        ? Image.network(urunResmiUrl!, fit: BoxFit.contain, errorBuilder: (c, e, s) => Icon(Icons.shopping_bag, size: 80, color: theme.disabledColor))
+                        : Icon(Icons.shopping_bag, size: 80, color: theme.disabledColor), 
                   ),
                 ),
                 const SizedBox(height: 20),
-                Text(urunAdi!, textAlign: TextAlign.center, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                Text(urunAdi!, textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color)),
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(color: durumRengi, borderRadius: BorderRadius.circular(30), boxShadow: [BoxShadow(color: durumRengi.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 5))]),
+                  decoration: BoxDecoration(
+                    color: durumRengi, 
+                    borderRadius: BorderRadius.circular(30), 
+                    boxShadow: [BoxShadow(color: durumRengi.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 5))]
+                  ),
                   child: Text(saglikDurumu ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
                 const SizedBox(height: 8),
-                Text(detay ?? '', style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                Text(detay ?? '', style: TextStyle(color: theme.textTheme.bodySmall?.color, fontSize: 13)),
               ],
             ),
           ),
 
+          // İÇERİK ANALİZİ KISMI
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -464,26 +492,30 @@ class _HomeTabState extends State<HomeTab> {
                 if (riskli > 0)
                   Container(
                     padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.red.shade200)),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1), 
+                      borderRadius: BorderRadius.circular(12), 
+                      border: Border.all(color: Colors.red.withOpacity(0.3))
+                    ),
                     child: Row(children: [
                       const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 30), 
                       const SizedBox(width: 12), 
-                      Expanded(child: Text('Dikkat! Bu üründe $riskli adet sağlığa zararlı olabilecek madde bulundu. Detaylar aşağıda.', style: TextStyle(color: Colors.red.shade900, fontWeight: FontWeight.bold)))
+                      Expanded(child: Text('Dikkat! İçeriğinde $riskli adet riskli madde bulundu. Detaylar aşağıda.', style: TextStyle(color: Colors.red.shade700, fontWeight: FontWeight.bold)))
                     ]),
                   ),
                 const SizedBox(height: 20),
-                const Text('İçindekiler ve Etkileri', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                Text('İçindekiler ve Etkileri', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color)),
                 const SizedBox(height: 12),
                 if (analiz.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: Center(child: Text('Bu ürün için içerik bilgisi bulunamadı.', style: TextStyle(color: Colors.grey))),
+                  Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Center(child: Text('Bu ürün için içerik bilgisi bulunamadı.', style: TextStyle(color: theme.disabledColor))),
                   ),
                 ...analiz.map((e) => Card(
                   elevation: 0, 
                   margin: const EdgeInsets.only(bottom: 10),
-                  color: e['riskli'] ? Colors.red.shade50 : Colors.white,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: e['riskli'] ? Colors.red.shade200 : Colors.grey.shade300)),
+                  color: e['riskli'] ? Colors.red.withOpacity(0.05) : theme.cardColor,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: e['riskli'] ? Colors.red.withOpacity(0.3) : theme.dividerColor)),
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
                     child: Column(
@@ -493,7 +525,7 @@ class _HomeTabState extends State<HomeTab> {
                           children: [
                             Icon(e['riskli'] ? Icons.dangerous : Icons.check_circle, color: e['riskli'] ? Colors.red : Colors.green),
                             const SizedBox(width: 10),
-                            Expanded(child: Text(e['madde'], style: TextStyle(fontSize: 16, fontWeight: e['riskli'] ? FontWeight.bold : FontWeight.w500))),
+                            Expanded(child: Text(e['madde'], style: TextStyle(fontSize: 16, fontWeight: e['riskli'] ? FontWeight.bold : FontWeight.w500, color: theme.textTheme.bodyLarge?.color))),
                           ],
                         ),
                         if (e['riskli'])
@@ -501,7 +533,7 @@ class _HomeTabState extends State<HomeTab> {
                             padding: const EdgeInsets.only(top: 8.0, left: 34),
                             child: Text(
                               e['aciklama'],
-                              style: TextStyle(color: Colors.red.shade900, fontSize: 14, fontStyle: FontStyle.italic),
+                              style: TextStyle(color: Colors.red.shade700, fontSize: 14, fontStyle: FontStyle.italic),
                             ),
                           ),
                       ],
@@ -715,10 +747,11 @@ class _HistoryTabState extends State<HistoryTab> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Tarama Geçmişi'), backgroundColor: Colors.teal.shade700, foregroundColor: Colors.white),
       body: gecmisUrunler.isEmpty
-          ? const Center(child: Text('Henüz bir ürün taramadınız.'))
+          ? Center(child: Text('Henüz bir ürün taramadınız.', style: TextStyle(color: theme.disabledColor)))
           : ListView.builder(
               padding: const EdgeInsets.all(12),
               itemCount: gecmisUrunler.length,
@@ -727,21 +760,22 @@ class _HistoryTabState extends State<HistoryTab> {
                 return Card(
                   margin: const EdgeInsets.only(bottom: 10),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  color: theme.cardColor,
                   child: ListTile(
                     contentPadding: const EdgeInsets.all(10),
                     leading: Container(
-                      width: 55, height: 55, decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey.shade100),
-                      child: ClipRRect(borderRadius: BorderRadius.circular(8), child: (urun.imageUrl.isNotEmpty) ? Image.network(urun.imageUrl, fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.image, color: Colors.grey)) : const Icon(Icons.image, color: Colors.grey)),
+                      width: 55, height: 55, decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: theme.scaffoldBackgroundColor),
+                      child: ClipRRect(borderRadius: BorderRadius.circular(8), child: (urun.imageUrl.isNotEmpty) ? Image.network(urun.imageUrl, fit: BoxFit.cover, errorBuilder: (c, e, s) => Icon(Icons.image, color: theme.disabledColor)) : Icon(Icons.image, color: theme.disabledColor)),
                     ),
-                    title: Text(urun.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
-                    subtitle: Text('${urun.date.day}/${urun.date.month}/${urun.date.year}', style: const TextStyle(fontSize: 12)),
+                    title: Text(urun.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.bold, color: theme.textTheme.bodyLarge?.color)),
+                    subtitle: Text('${urun.date.day}/${urun.date.month}/${urun.date.year}', style: TextStyle(fontSize: 12, color: theme.textTheme.bodySmall?.color)),
                     trailing: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: urun.status.contains('ZARARLI') ? Colors.red.shade50 : (urun.status.contains('RİSKLİ') ? Colors.orange.shade50 : Colors.green.shade50),
+                        color: urun.status.contains('ZARARLI') ? Colors.red.withOpacity(0.1) : (urun.status.contains('RİSKLİ') || urun.status.contains('DİKKATLİ') ? Colors.orange.withOpacity(0.1) : Colors.green.withOpacity(0.1)),
                         borderRadius: BorderRadius.circular(8)
                       ),
-                      child: Text(urun.status, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: urun.status.contains('ZARARLI') ? Colors.red : (urun.status.contains('RİSKLİ') ? Colors.orange.shade900 : Colors.green))),
+                      child: Text(urun.status, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: urun.status.contains('ZARARLI') ? Colors.red : (urun.status.contains('RİSKLİ') || urun.status.contains('DİKKATLİ') ? Colors.orange.shade800 : Colors.green))),
                     ),
                   ),
                 );
@@ -771,7 +805,7 @@ class SettingsTab extends StatelessWidget {
             onChanged: onThemeChanged,
           ),
           const Divider(),
-          const ListTile(leading: Icon(Icons.info), title: Text('Uygulama Hakkında'), subtitle: Text('Sağlık Tarayıcı v2.0\nİçerik analizi ve market önerileri.')),
+          const ListTile(leading: Icon(Icons.info), title: Text('Uygulama Hakkında'), subtitle: Text('Sağlık Tarayıcı v2.1\nİçerik analizi ve market önerileri.')),
         ],
       ),
     );
