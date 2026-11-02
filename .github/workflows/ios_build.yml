@@ -31,7 +31,7 @@ jobs:
 
           cd ios
           
-          # Podfile'a imzalamayı kapatan ayarı ekle
+          # 1. Podfile'a imzalamayı kapatan ayarı ekle
           if [ -f Podfile ]; then
             echo "" >> Podfile
             echo "post_install do |installer|" >> Podfile
@@ -40,16 +40,29 @@ jobs:
             echo "    target.build_configurations.each do |config|" >> Podfile
             echo "      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'" >> Podfile
             echo "      config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'" >> Podfile
+            echo "      config.build_settings['EXPANDED_CODE_SIGN_IDENTITY'] = ''" >> Podfile
             echo "    end" >> Podfile
             echo "  end" >> Podfile
             echo "end" >> Podfile
+            # Podları yükle (post_install bloğunun çalışması için)
+            pod install --repo-update
           fi
 
-          # Xcode proje dosyasında imzalamayı 'sed' ile zorla kapat (plutil yerine)
+          # 2. Runner projesindeki tüm imza ayarlarını zorla sil
           sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' Runner.xcodeproj/project.pbxproj
           sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' Runner.xcodeproj/project.pbxproj
-          sed -i '' 's/DEVELOPMENT_TEAM = .*;/DEVELOPMENT_TEAM = "";/g' Runner.xcodeproj/project.pbxproj
+          sed -i '' '/DEVELOPMENT_TEAM = /d' Runner.xcodeproj/project.pbxproj
           sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "";/g' Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "";/g' Runner.xcodeproj/project.pbxproj
+
+          # 3. Pods projesindeki tüm imza ayarlarını zorla sil
+          if [ -d "Pods" ]; then
+            sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' Pods/Pods.xcodeproj/project.pbxproj
+            sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' Pods/Pods.xcodeproj/project.pbxproj
+            sed -i '' '/DEVELOPMENT_TEAM = /d' Pods/Pods.xcodeproj/project.pbxproj
+            sed -i '' 's/CODE_SIGN_IDENTITY = "Apple Development";/CODE_SIGN_IDENTITY = "";/g' Pods/Pods.xcodeproj/project.pbxproj
+            sed -i '' 's/CODE_SIGN_IDENTITY = "iPhone Developer";/CODE_SIGN_IDENTITY = "";/g' Pods/Pods.xcodeproj/project.pbxproj
+          fi
 
       - name: iOS Uygulamasini Derle (Imzasiz)
         run: flutter build ios --release --no-codesign
