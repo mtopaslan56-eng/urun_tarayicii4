@@ -9,6 +9,24 @@ import 'tarama_ekrani.dart';
 const String BARKODOKU_USER_KEY = 'cTg8XiX4QPvYT37_n8In2KwHiBmhsjui';
 const String BARKODOKU_API_KEY = 'UvCDBwMAHAkSMN4i1BNa8CwXXwq8OVqG-WRREBpIl08-sz7Nbcsri0ZqWOSQ21u7o';
 
+// --- ZARARLI MADDE SÖZLÜĞÜ (Bilgilendirme için) ---
+final Map<String, String> maddeBilgileri = {
+  'şeker': 'Kan şekerini hızla yükseltir, diyabet ve obezite riskini artırır.',
+  'sugar': 'Kan şekerini hızla yükseltir, diyabet ve obezite riskini artırır.',
+  'glikoz şurubu': 'Yüksek fruktoz içerir, karaciğer yağlanmasına yol açar.',
+  'glucose syrup': 'Yüksek fruktoz içerir, karaciğer yağlanmasına yol açar.',
+  'palm yağı': 'Doymuş yağ oranı yüksektir, kolesterolü ve kalp hastalığı riskini artırır.',
+  'palm oil': 'Doymuş yağ oranı yüksektir, kolesterolü ve kalp hastalığı riskini artırır.',
+  'aspartam': 'Yapay tatlandırıcıdır. Aşırı tüketimi baş ağrısı ve migreni tetikleyebilir.',
+  'aspartame': 'Yapay tatlandırıcıdır. Aşırı tüketimi baş ağrısı ve migreni tetikleyebilir.',
+  'msj': 'MSG (Monosodyum Glutamat) iştahı açar ve doğal olmayan bir lezzet verir.',
+  'msg': 'MSG (Monosodyum Glutamat) iştahı açar ve doğal olmayan bir lezzet verir.',
+  'sodyum nitrat': 'İşlenmiş etlerde bulunur, kanserojen riski taşır.',
+  'e621': 'MSG türevi lezzet artırıcıdır, alerjik reaksiyonlara neden olabilir.',
+  'e951': 'Aspartam (yapay tatlandırıcı), fenilketonüri hastaları için tehlikelidir.',
+  'e330': 'Sitrik asit (genelde güvenli kabul edilir ancak mideyi rahatsız edebilir).',
+};
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(const UrunTarayiciApp());
@@ -54,6 +72,7 @@ class _UrunTarayiciAppState extends State<UrunTarayiciApp> {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00897B)),
         useMaterial3: true,
+        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00897B), brightness: Brightness.dark),
@@ -125,7 +144,7 @@ class ScannedProduct {
   );
 }
 
-// --- SAĞLIKLI ÜRÜN MODELİ (Çark İçin) ---
+// --- SAĞLIKLI MARKET ÜRÜNÜ MODELİ (Çark İçin) ---
 class HealthyItem {
   final String name;
   final String emoji;
@@ -135,15 +154,16 @@ class HealthyItem {
   HealthyItem(this.name, this.emoji, this.benefit, this.color);
 }
 
+// Gerçek Market Ürünleri (Sağlıklı Alternatifler)
 final List<HealthyItem> healthyItems = [
-  HealthyItem('Yeşil Elma', '🍏', 'Lif kaynağıdır, sindirimi rahatlatır ve bağışıklığı güçlendirir.', Colors.green.shade400),
-  HealthyItem('Muz', '🍌', 'Potasyum deposudur, kas sağlığını destekler ve enerji verir.', Colors.yellow.shade600),
-  HealthyItem('Yulaf', '🥣', 'Beta-glukan içerir, kolesterolü dengeler ve uzun süre tok tutar.', Colors.brown.shade300),
-  HealthyItem('Badem', '🌰', 'E vitamini ve sağlıklı yağlar açısından zengindir, kalbi korur.', Colors.orange.shade400),
-  HealthyItem('Kefir', '🥛', 'Probiyotik deposudur, bağırsak florasını mükemmel şekilde düzenler.', Colors.blue.shade300),
-  HealthyItem('Yeşil Çay', '🍵', 'Güçlü antioksidanlar içerir, metabolizmayı hızlandırır.', Colors.teal.shade400),
-  HealthyItem('Ispanak', '🥬', 'Demir ve magnezyum kaynağıdır, kan yapımını destekler.', Colors.green.shade700),
-  HealthyItem('Yaban Mersini', '🫐', 'Hafızayı güçlendiren antioksidanlar bakımından çok zengindir.', Colors.indigo.shade400),
+  HealthyItem('Sütaş Kefir', '🥛', 'Probiyotik deposudur, bağırsak florasını düzenler ve sindirimi kolaylaştırır.', Colors.blue.shade300),
+  HealthyItem('Eti Form Bisküvi', '🍪', 'Tam buğday unu içerir, lif kaynağıdır ve kan şekerini dengeler.', Colors.brown.shade300),
+  HealthyItem('Torku Tam Buğday', '🍞', 'Rafine şeker içermez, uzun süre tok tutar ve enerji verir.', Colors.orange.shade400),
+  HealthyItem('Dimes Şekersiz Su', '🧃', 'İlave şeker içermez, doğal meyve vitaminleriyle bağışıklığı destekler.', Colors.purple.shade300),
+  HealthyItem('Pınar Süt', '🥛', 'Kalsiyum ve D vitamini kaynağıdır, kemik sağlığını korur.', Colors.grey.shade400),
+  HealthyItem('Tadım Badem', '🌰', 'E vitamini ve sağlıklı yağlar açısından zengindir, kalbi korur.', Colors.amber.shade600),
+  HealthyItem('Doğadan Yeşil Çay', '🍵', 'Güçlü antioksidanlar içerir, metabolizmayı hızlandırır.', Colors.green.shade400),
+  HealthyItem('Sek Kefir', '🍶', 'Bağışıklık sistemini güçlendirir, laktoz intoleransına iyi gelir.', Colors.teal.shade300),
 ];
 
 // --- ANA EKRAN ---
@@ -201,11 +221,6 @@ class _HomeTabState extends State<HomeTab> {
   String? barkod;
   Color durumRengi = Colors.black;
   bool yukleniyor = false;
-
-  final List<String> riskliMaddeler = [
-    'palm yağı', 'glikoz şurubu', 'yüksek fruktozlu mısır şurubu',
-    'aspartam', 'msj', 'msg', 'sodyum nitrat', 'e621', 'e951', 'e330', 'şeker', 'sugar'
-  ];
 
   Future<void> urunSorgula(String b) async {
     setState(() { yukleniyor = true; urunAdi = null; barkod = b; });
@@ -277,11 +292,24 @@ class _HomeTabState extends State<HomeTab> {
     _gecmiseKaydet(ad ?? 'İsimsiz', durum, _fixImageUrl(resim) ?? '');
   }
 
+  // İçindekileri analiz edip açıklama ekleyen fonksiyon
   List<Map<String, dynamic>> icindekileriAnalizEt(String metin) {
     if (metin.isEmpty) return [];
     return metin.split(',').where((e) => e.trim().isNotEmpty).map((e) {
-      bool riskli = riskliMaddeler.any((r) => e.toLowerCase().contains(r));
-      return {'madde': e.trim(), 'riskli': riskli};
+      String madde = e.trim().toLowerCase();
+      bool riskli = false;
+      String aciklama = '';
+
+      // Sözlükte var mı diye bak
+      for (var key in maddeBilgileri.keys) {
+        if (madde.contains(key)) {
+          riskli = true;
+          aciklama = maddeBilgileri[key]!;
+          break;
+        }
+      }
+
+      return {'madde': e.trim(), 'riskli': riskli, 'aciklama': aciklama};
     }).toList();
   }
 
@@ -302,7 +330,11 @@ class _HomeTabState extends State<HomeTab> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Sağlık Tarayıcı', style: TextStyle(fontWeight: FontWeight.bold)), backgroundColor: Colors.teal.shade700, foregroundColor: Colors.white),
+      appBar: AppBar(
+        title: const Text('Sağlık Tarayıcı', style: TextStyle(fontWeight: FontWeight.bold)), 
+        backgroundColor: Colors.teal.shade700, foregroundColor: Colors.white,
+        elevation: 0,
+      ),
       body: yukleniyor ? const Center(child: CircularProgressIndicator()) : urunAdi == null ? _buildBaslangic() : _buildSonuc(),
     );
   }
@@ -312,12 +344,14 @@ class _HomeTabState extends State<HomeTab> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const AppLogo(size: 120), const SizedBox(height: 30),
-          const Text('Ürünlerin içeriğini\nanında analiz edin', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+          const AppLogo(size: 130), const SizedBox(height: 30),
+          const Text('Ürünlerin içeriğini\nanında analiz edin', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+          const SizedBox(height: 10),
+          const Text('Katkı maddelerini ve riskleri öğrenin', style: TextStyle(color: Colors.grey, fontSize: 16)),
           const SizedBox(height: 40),
           ElevatedButton.icon(
             onPressed: _tara, icon: const Icon(Icons.qr_code_scanner, size: 28), label: const Text('Taramayı Başlat', style: TextStyle(fontSize: 20)),
-            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20), backgroundColor: Colors.teal, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)), elevation: 5),
+            style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 20), backgroundColor: Colors.teal.shade700, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)), elevation: 5),
           ),
         ],
       ),
@@ -331,17 +365,19 @@ class _HomeTabState extends State<HomeTab> {
     return SingleChildScrollView(
       child: Column(
         children: [
+          // ÜST KISIM (RESİM VE DURUM)
           Container(
-            width: double.infinity, padding: const EdgeInsets.all(24),
+            width: double.infinity, padding: const EdgeInsets.fromLTRB(24, 10, 24, 30),
             decoration: BoxDecoration(
-              color: durumRengi.withOpacity(0.1), borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(40), bottomRight: Radius.circular(40)),
-              border: Border.all(color: durumRengi.withOpacity(0.3), width: 2),
+              color: durumRengi.withOpacity(0.05), 
+              borderRadius: const BorderRadius.only(bottomLeft: Radius.circular(40), bottomRight: Radius.circular(40)),
+              border: Border(bottom: BorderSide(color: durumRengi.withOpacity(0.2), width: 2)),
             ),
             child: Column(
               children: [
                 Container(
-                  height: 180, width: 180,
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: durumRengi.withOpacity(0.2), blurRadius: 30, spreadRadius: 5, offset: const Offset(0, 10))]),
+                  height: 160, width: 160,
+                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 8))]),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
                     child: (urunResmiUrl != null && urunResmiUrl!.isNotEmpty)
@@ -354,7 +390,7 @@ class _HomeTabState extends State<HomeTab> {
                 const SizedBox(height: 12),
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  decoration: BoxDecoration(color: durumRengi, borderRadius: BorderRadius.circular(30)),
+                  decoration: BoxDecoration(color: durumRengi, borderRadius: BorderRadius.circular(30), boxShadow: [BoxShadow(color: durumRengi.withOpacity(0.4), blurRadius: 10, offset: const Offset(0, 5))]),
                   child: Text(saglikDurumu ?? '', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
                 const SizedBox(height: 8),
@@ -362,6 +398,8 @@ class _HomeTabState extends State<HomeTab> {
               ],
             ),
           ),
+
+          // İÇERİK ANALİZİ KISMI
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -371,18 +409,46 @@ class _HomeTabState extends State<HomeTab> {
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(color: Colors.red.shade50, borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.red.shade200)),
-                    child: Row(children: [const Icon(Icons.warning, color: Colors.red), const SizedBox(width: 10), Expanded(child: Text('Bu üründe $riskli adet riskli madde bulundu!', style: TextStyle(color: Colors.red.shade900, fontWeight: FontWeight.bold)))]),
+                    child: Row(children: [
+                      const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 30), 
+                      const SizedBox(width: 12), 
+                      Expanded(child: Text('Dikkat! Bu üründe $riskli adet sağlığa zararlı olabilecek madde bulundu. Detaylar aşağıda.', style: TextStyle(color: Colors.red.shade900, fontWeight: FontWeight.bold)))
+                    ]),
                   ),
                 const SizedBox(height: 20),
-                const Text('İçindekiler', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
+                const Text('İçindekiler ve Etkileri', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 12),
                 ...analiz.map((e) => Card(
-                  elevation: 0, color: e['riskli'] ? Colors.red.shade50 : Theme.of(context).cardColor,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(color: e['riskli'] ? Colors.red.shade200 : Colors.grey.shade300)),
-                  child: ListTile(leading: Icon(e['riskli'] ? Icons.dangerous : Icons.check_circle, color: e['riskli'] ? Colors.red : Colors.green), title: Text(e['madde'], style: TextStyle(fontWeight: e['riskli'] ? FontWeight.bold : FontWeight.normal))),
+                  elevation: 0, 
+                  margin: const EdgeInsets.only(bottom: 10),
+                  color: e['riskli'] ? Colors.red.shade50 : Colors.white,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16), side: BorderSide(color: e['riskli'] ? Colors.red.shade200 : Colors.grey.shade300)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(e['riskli'] ? Icons.dangerous : Icons.check_circle, color: e['riskli'] ? Colors.red : Colors.green),
+                            const SizedBox(width: 10),
+                            Expanded(child: Text(e['madde'], style: TextStyle(fontSize: 16, fontWeight: e['riskli'] ? FontWeight.bold : FontWeight.w500))),
+                          ],
+                        ),
+                        if (e['riskli'])
+                          Padding(
+                            padding: const EdgeInsets.only(top: 8.0, left: 34),
+                            child: Text(
+                              e['aciklama'],
+                              style: TextStyle(color: Colors.red.shade900, fontSize: 14, fontStyle: FontStyle.italic),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
                 )),
                 const SizedBox(height: 30),
-                SizedBox(width: double.infinity, child: ElevatedButton.icon(onPressed: _tara, icon: const Icon(Icons.qr_code_scanner), label: const Text('Yeni Ürün Tara'), style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), backgroundColor: Colors.teal, foregroundColor: Colors.white))),
+                SizedBox(width: double.infinity, child: ElevatedButton.icon(onPressed: _tara, icon: const Icon(Icons.qr_code_scanner), label: const Text('Yeni Ürün Tara'), style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 16), backgroundColor: Colors.teal.shade700, foregroundColor: Colors.white, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16))))),
                 const SizedBox(height: 40),
               ],
             ),
@@ -454,11 +520,15 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(item.emoji, style: const TextStyle(fontSize: 60)),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(color: item.color.withOpacity(0.2), shape: BoxShape.circle),
+              child: Text(item.emoji, style: const TextStyle(fontSize: 50)),
+            ),
             const SizedBox(height: 16),
-            Text(item.name, style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
+            Text(item.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold), textAlign: TextAlign.center),
             const SizedBox(height: 12),
-            Text(item.benefit, textAlign: TextAlign.center, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+            Text(item.benefit, textAlign: TextAlign.center, style: const TextStyle(fontSize: 15, color: Colors.black87)),
             const SizedBox(height: 24),
             ElevatedButton(
               onPressed: () => Navigator.pop(context),
@@ -474,14 +544,17 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Bugün Ne Yesem?'), backgroundColor: Colors.teal.shade700, foregroundColor: Colors.white),
+      appBar: AppBar(title: const Text('Market Önerisi'), backgroundColor: Colors.teal.shade700, foregroundColor: Colors.white),
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text('Sağlıklı bir seçim için\nçarkı çevir!', textAlign: TextAlign.center, style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 40),
+            const Text('Bugün hangi sağlıklı\nürünü tüketelim?', textAlign: TextAlign.center, style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 10),
+            const Text('Çarkı çevir ve şansını dene!', style: TextStyle(color: Colors.grey, fontSize: 16)),
+            const SizedBox(height: 30),
             
+            // ÇARK
             SizedBox(
               width: 300, height: 300,
               child: Stack(
@@ -500,8 +573,8 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
                     },
                   ),
                   Positioned(
-                    top: -10,
-                    child: Icon(Icons.arrow_drop_down, size: 60, color: Colors.red.shade700),
+                    top: -5,
+                    child: Icon(Icons.arrow_drop_down, size: 70, color: Colors.red.shade700),
                   ),
                   GestureDetector(
                     onTap: _spinWheel,
@@ -509,8 +582,8 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
                       width: 80, height: 80,
                       decoration: BoxDecoration(
                         color: Colors.white, shape: BoxShape.circle,
-                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 10, offset: const Offset(0, 5))],
-                        border: Border.all(color: Colors.teal, width: 4)
+                        boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.3), blurRadius: 15, offset: const Offset(0, 5))],
+                        border: Border.all(color: Colors.teal, width: 5)
                       ),
                       child: Center(
                         child: isSpinning 
@@ -522,13 +595,6 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
                 ],
               ),
             ),
-            const SizedBox(height: 40),
-            if (selectedItem != null)
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                decoration: BoxDecoration(color: selectedItem!.color.withOpacity(0.2), borderRadius: BorderRadius.circular(20)),
-                child: Text('Bugünkü önerimiz: ${selectedItem!.name}', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: selectedItem!.color)),
-              )
           ],
         ),
       ),
@@ -536,6 +602,7 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
   }
 }
 
+// Çarkı Çizen CustomPainter
 class WheelPainter extends CustomPainter {
   final List<HealthyItem> items;
   WheelPainter(this.items);
@@ -552,8 +619,15 @@ class WheelPainter extends CustomPainter {
       paint.color = items[i].color;
       canvas.drawArc(rect, i * sliceAngle, sliceAngle, true, paint);
 
+      // Dilimler arasına ince çizgi (ayraç)
+      final linePaint = Paint()
+        ..color = Colors.white
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2;
+      canvas.drawLine(center, Offset(center.dx + radius * cos(i * sliceAngle), center.dy + radius * sin(i * sliceAngle)), linePaint);
+
       final textPainter = TextPainter(textDirection: TextDirection.ltr);
-      textPainter.text = TextSpan(text: items[i].emoji, style: const TextStyle(fontSize: 30));
+      textPainter.text = TextSpan(text: items[i].emoji, style: const TextStyle(fontSize: 34));
       textPainter.layout();
       
       final angle = (i * sliceAngle) + (sliceAngle / 2);
@@ -565,7 +639,7 @@ class WheelPainter extends CustomPainter {
     
     paint.color = Colors.teal.shade700;
     paint.style = PaintingStyle.stroke;
-    paint.strokeWidth = 10;
+    paint.strokeWidth = 12;
     canvas.drawCircle(center, radius, paint);
   }
 
@@ -610,14 +684,26 @@ class _HistoryTabState extends State<HistoryTab> {
                 final urun = gecmisUrunler[index];
                 return Card(
                   margin: const EdgeInsets.only(bottom: 10),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   child: ListTile(
+                    contentPadding: const EdgeInsets.all(10),
                     leading: Container(
-                      width: 50, height: 50, decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey.shade200),
-                      child: ClipRRect(borderRadius: BorderRadius.circular(8), child: (urun.imageUrl.isNotEmpty) ? Image.network(urun.imageUrl, fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.image)) : const Icon(Icons.image)),
+                      width: 55, height: 55, decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: Colors.grey.shade100),
+                      child: ClipRRect(borderRadius: BorderRadius.circular(8), child: (urun.imageUrl.isNotEmpty) ? Image.network(urun.imageUrl, fit: BoxFit.cover, errorBuilder: (c, e, s) => const Icon(Icons.image, color: Colors.grey)) : const Icon(Icons.image, color: Colors.grey)),
                     ),
-                    title: Text(urun.name, maxLines: 2, overflow: TextOverflow.ellipsis),
-                    subtitle: Text('${urun.date.day}/${urun.date.month}/${urun.date.year}'),
-                    trailing: Text(urun.status, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: urun.status.contains('ZARARLI') ? Colors.red : (urun.status.contains('RİSKLİ') ? Colors.orange : Colors.green))),
+                    title: Text(urun.name, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontWeight: FontWeight.bold)),
+                    subtitle: Text('${urun.date.day}/${urun.date.month}/${urun.date.year}', style: const TextStyle(fontSize: 12)),
+                    trailing: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: urun.status.contains('ZARARLI') ? Colors.red.shade50 : (urun.status.contains('RİSKLİ') ? Colors.orange.shade50 : Colors.green.shade50),
+                        borderRadius: BorderRadius.circular(8)
+                      ),
+                      child: Text(
+                        urun.status, 
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: urun.status.contains('ZARARLI') ? Colors.red : (urun.status.contains('RİSKLİ') ? Colors.orange.shade900 : Colors.green))
+                      ),
+                    ),
                   ),
                 );
               },
@@ -647,7 +733,7 @@ class SettingsTab extends StatelessWidget {
             onChanged: onThemeChanged,
           ),
           const Divider(),
-          const ListTile(leading: Icon(Icons.info), title: Text('Uygulama Hakkında'), subtitle: Text('Sağlık Tarayıcı v1.2\nİçerik analizi ve sağlıklı öneriler.')),
+          const ListTile(leading: Icon(Icons.info), title: Text('Uygulama Hakkında'), subtitle: Text('Sağlık Tarayıcı v2.0\nİçerik analizi ve market önerileri.')),
         ],
       ),
     );
