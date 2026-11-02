@@ -9,22 +9,34 @@ import 'tarama_ekrani.dart';
 const String BARKODOKU_USER_KEY = 'cTg8XiX4QPvYT37_n8In2KwHiBmhsjui';
 const String BARKODOKU_API_KEY = 'UvCDBwMAHAkSMN4i1BNa8CwXXwq8OVqG-WRREBpIl08-sz7Nbcsri0ZqWOSQ21u7o';
 
-// --- ZARARLI MADDE SÖZLÜĞÜ (Bilgilendirme için) ---
+// --- ZARARLI MADDE SÖZLÜĞÜ (Çok Daha Kapsamlı) ---
 final Map<String, String> maddeBilgileri = {
   'şeker': 'Kan şekerini hızla yükseltir, diyabet ve obezite riskini artırır.',
   'sugar': 'Kan şekerini hızla yükseltir, diyabet ve obezite riskini artırır.',
   'glikoz şurubu': 'Yüksek fruktoz içerir, karaciğer yağlanmasına yol açar.',
   'glucose syrup': 'Yüksek fruktoz içerir, karaciğer yağlanmasına yol açar.',
+  'fruktoz': 'Meyve şekeri olsa da ilave edildiğinde karaciğere zarar verir.',
+  'fructose': 'Meyve şekeri olsa da ilave edildiğinde karaciğere zarar verir.',
   'palm yağı': 'Doymuş yağ oranı yüksektir, kolesterolü ve kalp hastalığı riskini artırır.',
   'palm oil': 'Doymuş yağ oranı yüksektir, kolesterolü ve kalp hastalığı riskini artırır.',
   'aspartam': 'Yapay tatlandırıcıdır. Aşırı tüketimi baş ağrısı ve migreni tetikleyebilir.',
   'aspartame': 'Yapay tatlandırıcıdır. Aşırı tüketimi baş ağrısı ve migreni tetikleyebilir.',
   'msj': 'MSG (Monosodyum Glutamat) iştahı açar ve doğal olmayan bir lezzet verir.',
   'msg': 'MSG (Monosodyum Glutamat) iştahı açar ve doğal olmayan bir lezzet verir.',
+  'monosodyum glutamat': 'MSG (Monosodyum Glutamat) iştahı açar ve doğal olmayan bir lezzet verir.',
   'sodyum nitrat': 'İşlenmiş etlerde bulunur, kanserojen riski taşır.',
+  'sodium nitrite': 'İşlenmiş etlerde bulunur, kanserojen riski taşır.',
+  'kafein': 'Uyarıcıdır. Aşırı tüketimi uykusuzluk, çarpıntı ve anksiyete yapabilir.',
+  'caffeine': 'Uyarıcıdır. Aşırı tüketimi uykusuzluk, çarpıntı ve anksiyete yapabilir.',
+  'fosforik asit': 'Kolalarda bulunur, vücuttaki kalsiyumu çözer ve kemik erimesine yol açar.',
+  'phosphoric acid': 'Kolalarda bulunur, vücuttaki kalsiyumu çözer ve kemik erimesine yol açar.',
+  'tuz': 'Aşırı tuz tüketimi yüksek tansiyona ve böbrek hastalıklarına yol açar.',
+  'salt': 'Aşırı tuz tüketimi yüksek tansiyona ve böbrek hastalıklarına yol açar.',
   'e621': 'MSG türevi lezzet artırıcıdır, alerjik reaksiyonlara neden olabilir.',
   'e951': 'Aspartam (yapay tatlandırıcı), fenilketonüri hastaları için tehlikelidir.',
-  'e330': 'Sitrik asit (genelde güvenli kabul edilir ancak mideyi rahatsız edebilir).',
+  'e338': 'Fosforik asit, mide asidini artırır ve diş minesine zarar verebilir.',
+  'sitrik asit': 'Genelde güvenli kabul edilir ancak mideyi rahatsız edebilir.',
+  'e330': 'Sitrik asit, mideyi rahatsız edebilir.',
 };
 
 void main() async {
@@ -72,7 +84,7 @@ class _UrunTarayiciAppState extends State<UrunTarayiciApp> {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00897B)),
         useMaterial3: true,
-        scaffoldBackgroundColor: const Color(0xFFF5F7FA),
+        scaffoldBackgroundColor: isDarkMode ? null : const Color(0xFFF5F7FA),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00897B), brightness: Brightness.dark),
@@ -83,14 +95,12 @@ class _UrunTarayiciAppState extends State<UrunTarayiciApp> {
   }
 }
 
-// --- iOS İÇİN RESİM LİNKİ DÜZELTİCİ ---
 String? _fixImageUrl(String? url) {
   if (url == null || url.isEmpty) return null;
   if (url.startsWith('http://')) return url.replaceFirst('http://', 'https://');
   return url;
 }
 
-// --- ÖZEL LOGO ---
 class AppLogo extends StatelessWidget {
   final double size;
   const AppLogo({super.key, this.size = 100});
@@ -127,7 +137,6 @@ class AppLogo extends StatelessWidget {
   }
 }
 
-// --- ÜRÜN MODELİ ---
 class ScannedProduct {
   final String barcode;
   final String name;
@@ -144,33 +153,28 @@ class ScannedProduct {
   );
 }
 
-// --- SAĞLIKLI MARKET ÜRÜNÜ MODELİ (Çark İçin) ---
 class HealthyItem {
   final String name;
   final String emoji;
   final String benefit;
   final Color color;
-
   HealthyItem(this.name, this.emoji, this.benefit, this.color);
 }
 
-// Gerçek Market Ürünleri (Sağlıklı Alternatifler)
 final List<HealthyItem> healthyItems = [
-  HealthyItem('Sütaş Kefir', '🥛', 'Probiyotik deposudur, bağırsak florasını düzenler ve sindirimi kolaylaştırır.', Colors.blue.shade300),
-  HealthyItem('Eti Form Bisküvi', '🍪', 'Tam buğday unu içerir, lif kaynağıdır ve kan şekerini dengeler.', Colors.brown.shade300),
-  HealthyItem('Torku Tam Buğday', '🍞', 'Rafine şeker içermez, uzun süre tok tutar ve enerji verir.', Colors.orange.shade400),
-  HealthyItem('Dimes Şekersiz Su', '🧃', 'İlave şeker içermez, doğal meyve vitaminleriyle bağışıklığı destekler.', Colors.purple.shade300),
-  HealthyItem('Pınar Süt', '🥛', 'Kalsiyum ve D vitamini kaynağıdır, kemik sağlığını korur.', Colors.grey.shade400),
-  HealthyItem('Tadım Badem', '🌰', 'E vitamini ve sağlıklı yağlar açısından zengindir, kalbi korur.', Colors.amber.shade600),
+  HealthyItem('Sütaş Kefir', '🥛', 'Probiyotik deposudur, bağırsak florasını düzenler.', Colors.blue.shade300),
+  HealthyItem('Eti Form Bisküvi', '🍪', 'Tam buğday unu içerir, lif kaynağıdır.', Colors.brown.shade300),
+  HealthyItem('Torku Tam Buğday', '🍞', 'Rafine şeker içermez, uzun süre tok tutar.', Colors.orange.shade400),
+  HealthyItem('Dimes Şekersiz Su', '🧃', 'İlave şeker içermez, doğal vitaminlerle doludur.', Colors.purple.shade300),
+  HealthyItem('Pınar Süt', '🥛', 'Kalsiyum ve D vitamini kaynağıdır.', Colors.grey.shade400),
+  HealthyItem('Tadım Badem', '🌰', 'E vitamini ve sağlıklı yağlar açısından zengindir.', Colors.amber.shade600),
   HealthyItem('Doğadan Yeşil Çay', '🍵', 'Güçlü antioksidanlar içerir, metabolizmayı hızlandırır.', Colors.green.shade400),
-  HealthyItem('Sek Kefir', '🍶', 'Bağışıklık sistemini güçlendirir, laktoz intoleransına iyi gelir.', Colors.teal.shade300),
+  HealthyItem('Sek Kefir', '🍶', 'Bağışıklık sistemini güçlendirir.', Colors.teal.shade300),
 ];
 
-// --- ANA EKRAN ---
 class MainScreen extends StatefulWidget {
   final bool isDarkMode;
   final Function(bool) onThemeChanged;
-
   const MainScreen({super.key, required this.isDarkMode, required this.onThemeChanged});
 
   @override
@@ -205,7 +209,6 @@ class _MainScreenState extends State<MainScreen> {
   }
 }
 
-// --- SEKME 1: EV (TARAMA EKRANI) ---
 class HomeTab extends StatefulWidget {
   const HomeTab({super.key});
   @override
@@ -224,15 +227,45 @@ class _HomeTabState extends State<HomeTab> {
 
   Future<void> urunSorgula(String b) async {
     setState(() { yukleniyor = true; urunAdi = null; barkod = b; });
+    
     try {
+      // Her iki API'yi de aynı anda sorgula
       var trSonuc = await _barkodokuSorgula(b);
-      if (trSonuc != null) {
-        _sonucuIsle(trSonuc['urunAdi'], trSonuc['icerik'], trSonuc['resimUrl'], isOff: false);
-        return;
-      }
       var offSonuc = await _openFoodFactsSorgula(b);
-      if (offSonuc != null) {
-        _sonucuIsle(offSonuc['urunAdi'], offSonuc['icerik'], offSonuc['resimUrl'], isOff: true, nutriscore: offSonuc['nutriscore'], nova: offSonuc['nova']);
+      
+      String? finalName;
+      String? finalIngredients;
+      String? finalImage;
+      bool isOff = false;
+      String? nutriscore;
+      int? nova;
+
+      // İsim belirleme (Önce Barkodoku, yoksa OFF)
+      if (trSonuc != null && trSonuc['urunAdi'].toString().isNotEmpty) {
+        finalName = trSonuc['urunAdi'];
+      } else if (offSonuc != null) {
+        finalName = offSonuc['urunAdi'];
+      }
+
+      // İçerik belirleme (Barkodoku'da içerik varsa onu al, yoksa OFF'den al)
+      if (trSonuc != null && trSonuc['icerik'] != null && trSonuc['icerik'].toString().isNotEmpty && trSonuc['icerik'] != 'İçerik yok') {
+        finalIngredients = trSonuc['icerik'];
+      } else if (offSonuc != null && offSonuc['icerik'] != null) {
+        finalIngredients = offSonuc['icerik'];
+        isOff = true;
+        nutriscore = offSonuc['nutriscore'];
+        nova = offSonuc['nova'];
+      }
+
+      // Resim belirleme (Barkodoku'da resim yoksa OFF'den al)
+      if (trSonuc != null && trSonuc['resimUrl'] != null && trSonuc['resimUrl'].toString().isNotEmpty) {
+        finalImage = trSonuc['resimUrl'];
+      } else if (offSonuc != null && offSonuc['resimUrl'] != null) {
+        finalImage = offSonuc['resimUrl'];
+      }
+
+      if (finalName != null && finalName.isNotEmpty) {
+        _sonucuIsle(finalName, finalIngredients, finalImage, isOff: isOff, nutriscore: nutriscore, nova: nova);
       } else {
         setState(() => urunAdi = 'Ürün Bulunamadı');
       }
@@ -257,8 +290,18 @@ class _HomeTabState extends State<HomeTab> {
       
       if (barcodeRes.statusCode != 200) return null;
       final data = jsonDecode(barcodeRes.body);
-      if (data is List && data.isNotEmpty) return {'urunAdi': data[0]['text'], 'icerik': data[0]['ingredients'] ?? 'İçerik yok', 'resimUrl': data[0]['image']};
-      if (data is Map && data.containsKey('text')) return {'urunAdi': data['text'], 'icerik': data['ingredients'] ?? 'İçerik yok', 'resimUrl': data['image']};
+      
+      Map<String, dynamic>? urun;
+      if (data is List && data.isNotEmpty) urun = data[0];
+      else if (data is Map && data.containsKey('text')) urun = data;
+
+      if (urun != null) {
+        return {
+          'urunAdi': urun['text'] ?? urun['name'] ?? '',
+          'icerik': urun['ingredients'] ?? urun['description'] ?? '',
+          'resimUrl': urun['image'] ?? urun['imageUrl'] ?? '',
+        };
+      }
     } catch (e) { return null; }
     return null;
   }
@@ -268,7 +311,15 @@ class _HomeTabState extends State<HomeTab> {
       final res = await http.get(Uri.parse('https://world.openfoodfacts.org/api/v2/product/$b.json?fields=product_name,nutriscore_grade,nova_group,ingredients_text_tr,ingredients_text,image_url')).timeout(const Duration(seconds: 10));
       if (res.statusCode == 200) {
         final data = jsonDecode(res.body);
-        if (data['status'] == 1) return {'urunAdi': data['product']['product_name'], 'icerik': data['product']['ingredients_text_tr'] ?? data['product']['ingredients_text'] ?? 'İçerik yok', 'resimUrl': data['product']['image_url'], 'nutriscore': data['product']['nutriscore_grade'], 'nova': data['product']['nova_group']};
+        if (data['status'] == 1) {
+          return {
+            'urunAdi': data['product']['product_name'], 
+            'icerik': data['product']['ingredients_text_tr'] ?? data['product']['ingredients_text'] ?? '', 
+            'resimUrl': data['product']['image_url'], 
+            'nutriscore': data['product']['nutriscore_grade'], 
+            'nova': data['product']['nova_group']
+          };
+        }
       }
     } catch (e) { return null; }
     return null;
@@ -276,6 +327,7 @@ class _HomeTabState extends State<HomeTab> {
 
   void _sonucuIsle(String? ad, String? icerik, String? resim, {required bool isOff, String? nutriscore, int? nova}) {
     String durum = ''; Color renk = Colors.grey;
+    
     if (isOff && nutriscore != null) {
       if (nutriscore == 'd' || nutriscore == 'e' || nova == 4) { durum = '⛔ ZARARLI'; renk = Colors.red; }
       else if (nutriscore == 'c' || nova == 3) { durum = '⚠️ DİKKATLİ TÜKET'; renk = Colors.orange; }
@@ -286,31 +338,38 @@ class _HomeTabState extends State<HomeTab> {
       if (risk > 0) { durum = '⚠️ $risk RİSKLİ MADDE'; renk = Colors.orange; } else { durum = '✅ TÜKETİLEBİLİR'; renk = Colors.green; }
     }
     setState(() {
-      urunAdi = ad; icindekilerMetni = icerik; urunResmiUrl = _fixImageUrl(resim); 
-      saglikDurumu = durum; durumRengi = renk; detay = isOff ? 'Küresel Veritabanı' : 'Türkiye Veritabanı';
+      urunAdi = ad; 
+      icindekilerMetni = icerik; 
+      urunResmiUrl = _fixImageUrl(resim); 
+      saglikDurumu = durum; 
+      durumRengi = renk; 
+      detay = isOff ? 'Küresel Veritabanı' : 'Türkiye Veritabanı';
     });
     _gecmiseKaydet(ad ?? 'İsimsiz', durum, _fixImageUrl(resim) ?? '');
   }
 
-  // İçindekileri analiz edip açıklama ekleyen fonksiyon
   List<Map<String, dynamic>> icindekileriAnalizEt(String metin) {
-    if (metin.isEmpty) return [];
-    return metin.split(',').where((e) => e.trim().isNotEmpty).map((e) {
-      String madde = e.trim().toLowerCase();
+    if (metin.isEmpty || metin == 'İçerik yok') return [];
+    // Hem virgül hem noktalı virgülle ayır
+    List<String> parcalar = metin.split(RegExp(r'[,;]')).map((e) => e.trim()).toList();
+    List<Map<String, dynamic>> analiz = [];
+    
+    for (var parca in parcalar) {
+      if (parca.isEmpty) continue;
+      String maddeKucuk = parca.toLowerCase();
       bool riskli = false;
       String aciklama = '';
 
-      // Sözlükte var mı diye bak
       for (var key in maddeBilgileri.keys) {
-        if (madde.contains(key)) {
+        if (maddeKucuk.contains(key)) {
           riskli = true;
           aciklama = maddeBilgileri[key]!;
           break;
         }
       }
-
-      return {'madde': e.trim(), 'riskli': riskli, 'aciklama': aciklama};
-    }).toList();
+      analiz.add({'madde': parca, 'riskli': riskli, 'aciklama': aciklama});
+    }
+    return analiz;
   }
 
   _gecmiseKaydet(String ad, String durum, String resim) async {
@@ -361,11 +420,11 @@ class _HomeTabState extends State<HomeTab> {
   Widget _buildSonuc() {
     List<Map<String, dynamic>> analiz = icindekileriAnalizEt(icindekilerMetni ?? '');
     int riskli = analiz.where((e) => e['riskli'] == true).length;
+    bool hasImage = urunResmiUrl != null && urunResmiUrl!.isNotEmpty;
 
     return SingleChildScrollView(
       child: Column(
         children: [
-          // ÜST KISIM (RESİM VE DURUM)
           Container(
             width: double.infinity, padding: const EdgeInsets.fromLTRB(24, 10, 24, 30),
             decoration: BoxDecoration(
@@ -380,9 +439,9 @@ class _HomeTabState extends State<HomeTab> {
                   decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(24), boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.1), blurRadius: 20, offset: const Offset(0, 8))]),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(24),
-                    child: (urunResmiUrl != null && urunResmiUrl!.isNotEmpty)
+                    child: hasImage
                         ? Image.network(urunResmiUrl!, fit: BoxFit.contain, errorBuilder: (c, e, s) => const Icon(Icons.shopping_bag, size: 80, color: Colors.grey))
-                        : const Icon(Icons.shopping_bag, size: 80, color: Colors.grey),
+                        : const Icon(Icons.shopping_bag, size: 80, color: Colors.grey), // Eğer resim yoksa varsayılan ikon
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -399,7 +458,6 @@ class _HomeTabState extends State<HomeTab> {
             ),
           ),
 
-          // İÇERİK ANALİZİ KISMI
           Padding(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -418,6 +476,11 @@ class _HomeTabState extends State<HomeTab> {
                 const SizedBox(height: 20),
                 const Text('İçindekiler ve Etkileri', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 12),
+                if (analiz.isEmpty)
+                  const Padding(
+                    padding: EdgeInsets.all(20.0),
+                    child: Center(child: Text('Bu ürün için içerik bilgisi bulunamadı.', style: TextStyle(color: Colors.grey))),
+                  ),
                 ...analiz.map((e) => Card(
                   elevation: 0, 
                   margin: const EdgeInsets.only(bottom: 10),
@@ -459,7 +522,7 @@ class _HomeTabState extends State<HomeTab> {
   }
 }
 
-// --- SEKME 2: SAĞLIKLI ÖNERİ ÇARKI ---
+// --- ÇARK SEKME KISMI (Aynı kalacak) ---
 class HealthyWheelTab extends StatefulWidget {
   const HealthyWheelTab({super.key});
   @override
@@ -553,8 +616,6 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
             const SizedBox(height: 10),
             const Text('Çarkı çevir ve şansını dene!', style: TextStyle(color: Colors.grey, fontSize: 16)),
             const SizedBox(height: 30),
-            
-            // ÇARK
             SizedBox(
               width: 300, height: 300,
               child: Stack(
@@ -565,17 +626,11 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
                     builder: (context, child) {
                       return Transform.rotate(
                         angle: _animation.value,
-                        child: CustomPaint(
-                          size: const Size(300, 300),
-                          painter: WheelPainter(healthyItems),
-                        ),
+                        child: CustomPaint(size: const Size(300, 300), painter: WheelPainter(healthyItems)),
                       );
                     },
                   ),
-                  Positioned(
-                    top: -5,
-                    child: Icon(Icons.arrow_drop_down, size: 70, color: Colors.red.shade700),
-                  ),
+                  Positioned(top: -5, child: Icon(Icons.arrow_drop_down, size: 70, color: Colors.red.shade700)),
                   GestureDetector(
                     onTap: _spinWheel,
                     child: Container(
@@ -602,7 +657,6 @@ class _HealthyWheelTabState extends State<HealthyWheelTab> with SingleTickerProv
   }
 }
 
-// Çarkı Çizen CustomPainter
 class WheelPainter extends CustomPainter {
   final List<HealthyItem> items;
   WheelPainter(this.items);
@@ -618,25 +672,17 @@ class WheelPainter extends CustomPainter {
     for (int i = 0; i < items.length; i++) {
       paint.color = items[i].color;
       canvas.drawArc(rect, i * sliceAngle, sliceAngle, true, paint);
-
-      // Dilimler arasına ince çizgi (ayraç)
-      final linePaint = Paint()
-        ..color = Colors.white
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = 2;
+      final linePaint = Paint()..color = Colors.white..style = PaintingStyle.stroke..strokeWidth = 2;
       canvas.drawLine(center, Offset(center.dx + radius * cos(i * sliceAngle), center.dy + radius * sin(i * sliceAngle)), linePaint);
 
       final textPainter = TextPainter(textDirection: TextDirection.ltr);
       textPainter.text = TextSpan(text: items[i].emoji, style: const TextStyle(fontSize: 34));
       textPainter.layout();
-      
       final angle = (i * sliceAngle) + (sliceAngle / 2);
       final x = center.dx + (radius * 0.65) * cos(angle) - (textPainter.width / 2);
       final y = center.dy + (radius * 0.65) * sin(angle) - (textPainter.height / 2);
-      
       textPainter.paint(canvas, Offset(x, y));
     }
-    
     paint.color = Colors.teal.shade700;
     paint.style = PaintingStyle.stroke;
     paint.strokeWidth = 12;
@@ -647,7 +693,6 @@ class WheelPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// --- SEKME 3: GEÇMİŞ ---
 class HistoryTab extends StatefulWidget {
   const HistoryTab({super.key});
   @override
@@ -699,10 +744,7 @@ class _HistoryTabState extends State<HistoryTab> {
                         color: urun.status.contains('ZARARLI') ? Colors.red.shade50 : (urun.status.contains('RİSKLİ') ? Colors.orange.shade50 : Colors.green.shade50),
                         borderRadius: BorderRadius.circular(8)
                       ),
-                      child: Text(
-                        urun.status, 
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: urun.status.contains('ZARARLI') ? Colors.red : (urun.status.contains('RİSKLİ') ? Colors.orange.shade900 : Colors.green))
-                      ),
+                      child: Text(urun.status, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 11, color: urun.status.contains('ZARARLI') ? Colors.red : (urun.status.contains('RİSKLİ') ? Colors.orange.shade900 : Colors.green))),
                     ),
                   ),
                 );
@@ -712,7 +754,6 @@ class _HistoryTabState extends State<HistoryTab> {
   }
 }
 
-// --- SEKME 4: AYARLAR ---
 class SettingsTab extends StatelessWidget {
   final bool isDarkMode;
   final Function(bool) onThemeChanged;
