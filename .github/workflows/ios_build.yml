@@ -1,48 +1,62 @@
 name: iOS Build
 
 on:
-  push:
-    branches: [ "main", "master" ]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: macos-latest
-
     steps:
-    - name: Kodu İndir
-      uses: actions/checkout@v4
+      - name: Kodu Indir
+        uses: actions/checkout@v4
 
-    - name: Flutter Kur
-      uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
+      - name: Flutter Kur
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.0'
+          channel: 'stable'
 
-    - name: Eksik iOS Dosyalarını Oluştur
-      run: flutter create . --platforms=ios
+      - name: iOS Klasorunu Olustur ve Kamera Izni Ekle
+        run: |
+          flutter create . --platforms=ios --org=com.ornek --project-name=urun_tarayici
+          /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Kamera izni'" ios/Runner/Info.plist || true
 
-    - name: Bağımlılıkları Yükle
-      run: flutter pub get
+      - name: Bagimliliklari Yukle (Pub Get)
+        run: flutter pub get
 
-    - name: Podları Yükle
-      run: |
-        cd ios
-        pod install
-        cd ..
+      - name: Podfile Olustur ve Imzalamayi Kapat
+        run: |
+          # Xcode projesini ve Podfile'ı oluştur (derleme yapmaz, sadece hazırlar)
+          flutter build ios --config-only
+          
+          # Oluşan Podfile'ın içine imzalamayı kapatan kodu ekle
+          cd ios
+          if [ -f Podfile ]; then
+            echo "" >> Podfile
+            echo "post_install do |installer|" >> Podfile
+            echo "  installer.pods_project.targets.each do |target|" >> Podfile
+            echo "    flutter_additional_ios_build_settings(target)" >> Podfile
+            echo "    target.build_configurations.each do |config|" >> Podfile
+            echo "      config.build_settings['CODE_SIGNING_ALLOWED'] = 'NO'" >> Podfile
+            echo "      config.build_settings['CODE_SIGNING_REQUIRED'] = 'NO'" >> Podfile
+            echo "    end" >> Podfile
+            echo "  end" >> Podfile
+            echo "end" >> Podfile
+          else
+            echo "Podfile olusturulamadi!"
+            exit 1
+          fi
 
-    - name: İmzalamayı Zorla Kapat
-      run: sed -i '' 's/CODE_SIGNING_ALLOWED = YES/CODE_SIGNING_ALLOWED = NO/g' ios/Runner.xcodeproj/project.pbxproj
+      - name: iOS Uygulamasini Derle (Imzasiz)
+        run: flutter build ios --release --no-codesign
 
-    - name: iOS Uygulamasını Derle
-      run: flutter build ios --release --no-codesign
+      - name: Derlenen Dosyayi Sikistir
+        run: |
+          cd build/ios/iphoneos
+          zip -r Runner.app.zip Runner.app
 
-    - name: Derlenen Dosyayı Sıkıştır
-      run: |
-        cd build/ios/iphoneos
-        zip -r Runner.app.zip Runner.app
-
-    - name: Dosyayı GitHub'a Yükle
-      uses: actions/upload-artifact@v4
-      with:
-        name: ios-build
-        path: build/ios/iphoneos/Runner.app.zip
+      - name: Dosyayi GitHub'a Yukle
+        uses: actions/upload-artifact@v4
+        with:
+          name: Runner-app-ios
+          path: build/ios/iphoneos/Runner.app.zip
