@@ -1,9 +1,17 @@
-scripts:
+workflows:
+  ios-workflow:
+    name: iOS Unsigned Build
+    instance_type: mac_mini_m2
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+    scripts:
       - name: iOS Klasörünü Oluştur ve Kamera İzni Ekle
         script: |
           flutter create . --platforms=ios --org=com.ornek --project-name=urun_tarayici
           /usr/libexec/PlistBuddy -c "Add :NSCameraUsageDescription string 'Kamera izni'" ios/Runner/Info.plist || true
-      
       - name: Bağımlılıkları Temizle ve Yeniden Yükle
         script: |
           flutter clean
@@ -12,7 +20,8 @@ scripts:
           rm -f Podfile.lock
           pod install --repo-update
           cd ..
-      
       - name: iOS Uygulamasını Derle (İmzasız)
         script: |
           flutter build ios --release --no-codesign
+    artifacts:
+      - build/ios/iphoneos/*.app
